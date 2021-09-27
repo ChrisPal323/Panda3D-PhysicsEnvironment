@@ -1,6 +1,7 @@
 import random
 from direct.showbase.ShowBase import ShowBase
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import OnscreenImage
 
 import panda3d.core as core
 
@@ -14,15 +15,16 @@ class SimplePhysicsEngine(ShowBase):
         # Name Frame
         wp = core.WindowProperties()
         wp.setTitle("Simple Physics Engine")
+        wp.setSize(1080, 720)
         self.win.requestProperties(wp)
 
         # Set render stuff
         self.setBackgroundColor(0.5, 0.5, 1)
-        self.disableMouse()
+        self.disableMouse()  # This name sucks, just disables default mouse
         self.enableParticles()
 
         # Font / text
-        font = self.loader.loadFont('media/font/Carlito-Regular.ttf')
+        font = self.loader.loadFont('media/fonts/Carlito-Regular.ttf')
         font.setPixelsPerUnit(100)
         font.setPageSize(512, 1024)
         loading = OnscreenText(text='Loading...',
@@ -52,6 +54,7 @@ class SimplePhysicsEngine(ShowBase):
         self.cam.setPos(0, 0, 0)
         self.cam.setHpr(0, -45, 0)
 
+        # World Size!
         self.worldSize = core.LPoint3f(128, 128, 100)
 
         self.cc = camera.CameraController(self.worldSize,

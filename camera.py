@@ -24,10 +24,10 @@ class CameraController(DirectObject):
         self.zoomdrag = None
         self.moving = False
         self.panning = False
+        self.pause = False
 
-        self.accept_keyboard()
-        self.accept('console-open', self.ignore_keyboard)
-        self.accept('console-close', self.accept_keyboard)
+        self.accept('escape', self.show_pause_menu)
+        self.accept('escape', self.close_pause_menu)
 
         self.accept('mouse3', self.start_drag)
         self.accept('mouse3-up', self.end_drag)
@@ -37,16 +37,15 @@ class CameraController(DirectObject):
 
         taskMgr.add(self.move_camera, "Move Camera")
 
-    def accept_keyboard(self):
-        for k in self.keys:
-            self.accept(k, self.key, [k, True])
-            self.accept(k + '-up', self.key, [k, False])
+    def close_pause_menu(self):
+        pass
 
-    def ignore_keyboard(self):
-        for k in self.keys:
-            self.ignore(k)
-            self.ignore(k + '-up')
-            self.keys[k] = False
+    def show_pause_menu(self):
+        # TODO: show a pause menu
+        # disable movement / looking
+        # show mouse
+
+        pass
 
     def key(self, key, down):
         self.keys[key] = down
