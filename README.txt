@@ -1,0 +1,1 @@
+This will be a simple physics engine using Panda3D as the graphics loader. This will have blocks and items that interact with each other and movement as they would (roughly) in the world air
