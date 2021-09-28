@@ -7,6 +7,7 @@ import panda3d.core as core
 
 import camera
 
+
 class SimplePhysicsEngine(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
@@ -48,9 +49,14 @@ class SimplePhysicsEngine(ShowBase):
         self.scene = self.loader.loadModel("media/models/environment")
         self.scene.reparentTo(self.render)
 
-        loading.destroy()  # clear text
+        self.ball = self.loader.loadModel("media/models/soccerball")
+        self.ball.setScale(5, 5, 5)
+        self.ball.setPos(5, 5, 5)
+        self.ball.reparentTo(self.render)
 
-        self.camLens.setFocalLength(0.5)
+        loading.destroy()  # clear text a
+
+        self.camLens.setFocalLength(0.4)
         self.camera.setPos(0, 0, 100)
         self.cam.setPos(0, 0, 0)
         self.cam.setHpr(0, -45, 0)

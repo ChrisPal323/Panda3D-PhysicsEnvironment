@@ -45,7 +45,7 @@ class PhysicsWorld():
             # v = v0 + (F/m)(t)
             # x = x0 + vt
             object.force += object.mass * self.gravityVector
-            object.velocity += object.force / (object.mass * deltaTime)
+            object.velocity += object.force / object.mass * deltaTime
             object.position += object.velocity * deltaTime
 
             # reset net force

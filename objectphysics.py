@@ -23,7 +23,3 @@ class Object():
         self.position = (0, 0, 0)
         self.velocity = None
         self.force = None
-
-    # find pos if right hand
-    def return_velocity_vector(self):
-        pass

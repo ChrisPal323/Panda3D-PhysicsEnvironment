@@ -26,6 +26,7 @@ class CameraController(DirectObject):
 
         self.lookAround = None
         self.moving = False
+        self.panning = False  # World extents!
         self.pause = False
 
         self.accept_keyboard()
@@ -78,7 +79,7 @@ class CameraController(DirectObject):
               int(self.window.getProperties().getYSize() / 2))
 
     def move_camera(self, task):
-        self.moving = self.lookAround
+        self.panning = any(self.keys.values())
 
         dt = globalClock.getDt()
         verticle_move_speed = 75
@@ -95,6 +96,12 @@ class CameraController(DirectObject):
             self.body.setZ(self.body, dt * verticle_move_speed)
         if self.keys['lshift']:
             self.body.setZ(self.body, -dt * verticle_move_speed)
+
+        if self.panning:
+            pos = self.body.getPos()
+            self.body.setPos(bound(pos.x, 0, self.extents.x),
+                             bound(pos.y, 0, self.extents.y),
+                             pos.z)
 
         if self.lookAround:
             if self.mouse.hasMouse():
