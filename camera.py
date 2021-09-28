@@ -4,7 +4,7 @@ from direct.showbase.PythonUtil import bound
 
 from panda3d.core import Vec3, Point2
 
-import playerphysics
+import playermodel
 
 class CameraController(DirectObject):
     def __init__(self, extents, mouse, body, eye, window):
