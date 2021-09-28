@@ -7,7 +7,6 @@ import panda3d.core as core
 
 import camera
 
-
 class SimplePhysicsEngine(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
@@ -16,11 +15,13 @@ class SimplePhysicsEngine(ShowBase):
         wp = core.WindowProperties()
         wp.setTitle("Simple Physics Engine")
         wp.setSize(1080, 720)
+        wp.setCursorHidden(True)
         self.win.requestProperties(wp)
 
         # Set render stuff
         self.setBackgroundColor(0.5, 0.5, 1)
-        self.disableMouse()  # This name sucks, just disables default mouse
+        self.disableMouse()  # This name sucks, just disables default mous
+
         self.enableParticles()
 
         # Font / text
@@ -49,7 +50,7 @@ class SimplePhysicsEngine(ShowBase):
 
         loading.destroy()  # clear text
 
-        self.camLens.setFocalLength(1)
+        self.camLens.setFocalLength(0.5)
         self.camera.setPos(0, 0, 100)
         self.cam.setPos(0, 0, 0)
         self.cam.setHpr(0, -45, 0)
@@ -60,7 +61,8 @@ class SimplePhysicsEngine(ShowBase):
         self.cc = camera.CameraController(self.worldSize,
                                           self.mouseWatcherNode,
                                           self.camera,
-                                          self.cam)
+                                          self.cam,
+                                          self.win)
 
     def add_light(self):
         x, y = random.choice(list(self.world.columns()))
