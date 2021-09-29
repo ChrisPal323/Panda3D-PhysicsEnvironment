@@ -21,13 +21,17 @@ class CameraController(DirectObject):
             'd': False,
             'a': False,
             'space': False,
-            'lshift': False
+            'lshift': False,
+            'lcontrol': False
         }
 
         self.lookAround = None
         self.moving = False
         self.panning = False  # World extents!
         self.pause = False
+
+        self.worldExtents = False
+        self.worldExtents = False
 
         self.accept_keyboard()
         self.accept('console-open', self.ignore_keyboard)
@@ -82,8 +86,9 @@ class CameraController(DirectObject):
         self.panning = any(self.keys.values())
 
         dt = globalClock.getDt()
-        verticle_move_speed = 75
-        horizontal_move_speed = 75
+        verticle_move_speed = 2
+        horizontal_move_speed = 2
+        sprint_verticle_move_speed = 3
         if self.keys['w']:
             self.body.setY(self.body, dt * horizontal_move_speed)
         if self.keys['s']:
@@ -96,12 +101,16 @@ class CameraController(DirectObject):
             self.body.setZ(self.body, dt * verticle_move_speed)
         if self.keys['lshift']:
             self.body.setZ(self.body, -dt * verticle_move_speed)
+        if self.keys['lcontrol'] and self.keys['w']:
+            self.body.setY(self.body, dt * sprint_verticle_move_speed)
 
-        if self.panning:
-            pos = self.body.getPos()
-            self.body.setPos(bound(pos.x, 0, self.extents.x),
-                             bound(pos.y, 0, self.extents.y),
-                             pos.z)
+        # check if world extents are on
+        if self.worldExtents:
+            if self.panning:
+                pos = self.body.getPos()
+                self.body.setPos(bound(pos.x, 0, self.extents.x),
+                                bound(pos.y, 0, self.extents.y),
+                                pos.z)
 
         if self.lookAround:
             if self.mouse.hasMouse():

@@ -4,6 +4,11 @@ from direct.showbase.PythonUtil import bound
 
 from panda3d.core import Vec3, Point2
 
+from panda3d.bullet import BulletWorld
+from panda3d.bullet import BulletPlaneShape
+from panda3d.bullet import BulletRigidBodyNode
+from panda3d.bullet import BulletBoxShape
+
 
 # Class for player physics
 # Mass of player
@@ -13,13 +18,19 @@ from panda3d.core import Vec3, Point2
 
 class Object():
 
-    def __init__(self, mass, size, shape):
-        self.mass = mass
-        self.size = size
-        self.shape = shape  # just string of ball, cube, ect
+    def __init__(self, mass, shape, size, world):
+        self.mass = mass  # kg
+        self.shape = shape  # just string of ball, box, ect
+        self.size = size  # a Vec3
 
-        # ---- physics!-----
-        # all three are 3Vectors
-        self.position = (0, 0, 0)
-        self.velocity = None
-        self.force = None
+        # Box
+        shape = BulletBoxShape(size)
+        node = BulletRigidBodyNode(self.shape)
+        node.setMass(mass)
+        node.addShape(shape)
+        np = render.attachNewNode(node)
+        np.setPos(0, 0, 50)
+        world.attachRigidBody(node)
+        model = loader.loadModel('media/models/box.egg')
+        model.flattenLight()
+        model.reparentTo(np)

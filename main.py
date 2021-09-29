@@ -4,9 +4,13 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 
 import panda3d.core as core
+from panda3d.core import CollisionSphere
+from panda3d.core import NodePath
+from panda3d.core import Vec3
+from panda3d.core import CollisionHandlerQueue
 
 import camera
-
+import worldphysics
 
 class SimplePhysicsEngine(ShowBase):
     def __init__(self):
@@ -21,8 +25,9 @@ class SimplePhysicsEngine(ShowBase):
 
         # Set render stuff
         self.setBackgroundColor(0.5, 0.5, 1)
-        self.disableMouse()  # This name sucks, just disables default mous
+        self.disableMouse()  # This name sucks, just disables default mouse
 
+        # Physics Engine?
         self.enableParticles()
 
         # Font / text
@@ -47,22 +52,32 @@ class SimplePhysicsEngine(ShowBase):
         self.graphicsEngine.renderFrame()
 
         self.scene = self.loader.loadModel("media/models/environment")
+        self.scene.setScale(0.01, 0.01, 0.01)
+        self.scene.setPos(0, 0, 0)
         self.scene.reparentTo(self.render)
 
-        self.ball = self.loader.loadModel("media/models/soccerball")
-        self.ball.setScale(5, 5, 5)
-        self.ball.setPos(5, 5, 5)
-        self.ball.reparentTo(self.render)
+        # -------------- Testing Panda3D Physics with sphere Soccerball -----------------
+
+        self.physicsWorld = worldphysics.PhysicsWorld(self.taskMgr)
+
+        def update(task):
+            dt = globalClock.getDt()
+            self.physicsWorld.world.doPhysics(dt)
+            return task.cont
+
+        taskMgr.add(update, 'update')
+
+        # ----------------------------------------------------------------------
 
         loading.destroy()  # clear text a
 
         self.camLens.setFocalLength(0.4)
-        self.camera.setPos(0, 0, 100)
+        self.camera.setPos(0, 0, 2)
         self.cam.setPos(0, 0, 0)
         self.cam.setHpr(0, -45, 0)
 
         # World Size!
-        self.worldSize = core.LPoint3f(128, 128, 100)
+        self.worldSize = core.LPoint3f(10, 10, 10)
 
         self.cc = camera.CameraController(self.worldSize,
                                           self.mouseWatcherNode,
