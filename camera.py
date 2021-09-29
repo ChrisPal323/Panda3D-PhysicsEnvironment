@@ -86,9 +86,9 @@ class CameraController(DirectObject):
         self.panning = any(self.keys.values())
 
         dt = globalClock.getDt()
-        verticle_move_speed = 2
-        horizontal_move_speed = 2
-        sprint_verticle_move_speed = 3
+        verticle_move_speed = 5
+        horizontal_move_speed = 5
+        sprint_verticle_move_speed = 7
         if self.keys['w']:
             self.body.setY(self.body, dt * horizontal_move_speed)
         if self.keys['s']:

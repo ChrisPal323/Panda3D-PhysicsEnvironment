@@ -18,19 +18,26 @@ from panda3d.bullet import BulletBoxShape
 
 class Object():
 
-    def __init__(self, mass, shape, size, world):
+    def __init__(self, objName, mass, shapeName, size):
         self.mass = mass  # kg
-        self.shape = shape  # just string of ball, box, ect
+        self.shapeName = shapeName  # just string of ball, box, ect
+        self.objName = objName
         self.size = size  # a Vec3
+        self.node = None
 
         # Box
-        shape = BulletBoxShape(size)
-        node = BulletRigidBodyNode(self.shape)
-        node.setMass(mass)
-        node.addShape(shape)
-        np = render.attachNewNode(node)
-        np.setPos(0, 0, 50)
-        world.attachRigidBody(node)
-        model = loader.loadModel('media/models/box.egg')
+        nodeShape = BulletBoxShape(size)
+        self.node = BulletRigidBodyNode(shapeName)
+        self.node.setMass(mass)
+        self.node.addShape(nodeShape)
+        self.np = render.attachNewNode(self.node)
+
+        # Model name string
+        name = f'media/models/{shapeName}.egg'
+        model = loader.loadModel(name)
         model.flattenLight()
-        model.reparentTo(np)
+        model.reparentTo(self.np)
+
+    def setPos(self, x, y, z):
+        self.np.setPos(x, y, z)
+        pass

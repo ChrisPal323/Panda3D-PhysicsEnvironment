@@ -34,8 +34,13 @@ class PhysicsWorld():
         node.addShape(ground)
 
         np = render.attachNewNode(node)
-        np.setPos(0, 0, -2)
+        np.setPos(0, 0, -1)
 
         self.world.attachRigidBody(node)
 
-        obj1 = objectphysics.Object(1, 'Box', Vec3(0.5, 0.5, 0.5), self.world)
+    # Getter
+    def addObject(self, object):
+        self.world.attachRigidBody(object.node)
+
+    def removeObject(self):
+        pass

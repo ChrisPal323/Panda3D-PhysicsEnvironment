@@ -11,6 +11,7 @@ from panda3d.core import CollisionHandlerQueue
 
 import camera
 import worldphysics
+import objectphysics
 
 class SimplePhysicsEngine(ShowBase):
     def __init__(self):
@@ -52,17 +53,24 @@ class SimplePhysicsEngine(ShowBase):
         self.graphicsEngine.renderFrame()
 
         self.scene = self.loader.loadModel("media/models/environment")
-        self.scene.setScale(0.01, 0.01, 0.01)
+        self.scene.setScale(0.05, 0.05, 0.05)
         self.scene.setPos(0, 0, 0)
         self.scene.reparentTo(self.render)
 
-        # -------------- Testing Panda3D Physics with sphere Soccerball -----------------
+        # -------------------------  Physics  -------------------------------
 
-        self.physicsWorld = worldphysics.PhysicsWorld(self.taskMgr)
+        physicsWorld = worldphysics.PhysicsWorld(self.taskMgr)
+
+        # Create box object (name, mass, shapeName, size)
+        box = objectphysics.Object('Test Box', 1, 'box', Vec3(0.5, 0.5, 0.5))
+        box.setPos(0, 0, 5)
+
+        # Attach object
+        physicsWorld.addObject(box)
 
         def update(task):
             dt = globalClock.getDt()
-            self.physicsWorld.world.doPhysics(dt)
+            physicsWorld.world.doPhysics(dt)
             return task.cont
 
         taskMgr.add(update, 'update')
@@ -72,8 +80,7 @@ class SimplePhysicsEngine(ShowBase):
         loading.destroy()  # clear text a
 
         self.camLens.setFocalLength(0.4)
-        self.camera.setPos(0, 0, 2)
-        self.cam.setPos(0, 0, 0)
+        self.camera.setPos(-5, 0, 2)
         self.cam.setHpr(0, -45, 0)
 
         # World Size!
