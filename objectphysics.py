@@ -3,7 +3,7 @@ from direct.directtools.DirectGeometry import LineNodePath
 from direct.task.TaskManagerGlobal import taskMgr
 from direct.showbase.PythonUtil import bound
 
-from panda3d.core import Vec3, Point2
+from panda3d.core import Vec3, Point2, LVecBase3f
 
 from panda3d.bullet import BulletWorld
 from panda3d.bullet import BulletPlaneShape
@@ -50,23 +50,40 @@ class Object():
     def getPos(self):
         return self.np.getPos()
 
-    def drawLinearVelocityArrow(self):
+    def createLinearVelocityArrow(self):
+        self.arrow = LineNodePath()
+        self.arrow.reparentTo(self.render)
+        self.arrow.drawArrow(Vec3(0, 0, 0),  # pos 1
+                        Vec3(0, 0, 0),  # pos 2
+                        50, 0.1)  # line stuff
+        self.arrow.create()
+
+    def updateLinearVelocityArrow(self):
+
 
         velocity = self.getVelocity()
         pos = self.getPos()
 
         # make vectors into Vec3 types
-        velocityVec = Vec3(velocity.x, velocity.y, velocity.z)
+        velocityPointVec = Vec3(velocity.x, velocity.y, velocity.z)
         posVec = Vec3(pos.x, pos.y, pos.z)
 
-        # TODO : NORMILIZE THIS VECTOR!
+        # Find vector between two points
+        velocityVec = (velocityPointVec.x - posVec.x, velocityPointVec.y - pos.y, velocityPointVec.z - pos.z)
 
-        arrow = LineNodePath()
-        arrow.reparentTo(self.render)
-        arrow.drawArrow(posVec,  # pos 1
-                        velocityVec,  # pos 2
-                        5, 1)  # line stuff
-        arrow.create()
+        # Normalize vector
+        normVelocity = self.normalize(velocityVec)
+        normVelocity = Vec3(normVelocity[0], normVelocity[1], normVelocity[2])
+
+        print(normVelocity)
+        
+        self.arrow.s
+
+    def normalize(self, v):
+        norm = np.linalg.norm(v)
+        if norm == 0:
+            return v
+        return v / norm
 
     def setPos(self, x, y, z):
         self.np.setPos(x, y, z)

@@ -74,6 +74,9 @@ class SimplePhysicsEngine(ShowBase):
         # Attach object
         physicsWorld.addObject(box)
 
+        # create linear velocity
+        box.createLinearVelocityArrow()
+
         def update(task):
 
             # Physics refresh
@@ -84,8 +87,6 @@ class SimplePhysicsEngine(ShowBase):
             self.cameraPos = f"({round(self.camera.getX(), 1)}, {round(self.camera.getY(), 1)}, {round(self.camera.getZ(), 1)})"
             self.posText.text = self.cameraPos
 
-            # print linear velocity
-            box.drawLinearVelocityArrow()
 
             return task.cont
 
