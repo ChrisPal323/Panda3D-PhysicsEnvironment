@@ -1,4 +1,5 @@
 from direct.showbase.DirectObject import DirectObject
+from direct.directtools.DirectGeometry import LineNodePath
 from direct.task.TaskManagerGlobal import taskMgr
 from direct.showbase.PythonUtil import bound
 
@@ -8,6 +9,8 @@ from panda3d.bullet import BulletWorld
 from panda3d.bullet import BulletPlaneShape
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.bullet import BulletBoxShape
+
+import numpy as np
 
 
 # Class for player physics
@@ -37,6 +40,33 @@ class Object():
         model = loader.loadModel(name)
         model.flattenLight()
         model.reparentTo(self.np)
+
+    def attachToRender(self, render):
+        self.render = render
+
+    def getVelocity(self):
+        return self.node.getLinearVelocity()
+
+    def getPos(self):
+        return self.np.getPos()
+
+    def drawLinearVelocityArrow(self):
+
+        velocity = self.getVelocity()
+        pos = self.getPos()
+
+        # make vectors into Vec3 types
+        velocityVec = Vec3(velocity.x, velocity.y, velocity.z)
+        posVec = Vec3(pos.x, pos.y, pos.z)
+
+        # TODO : NORMILIZE THIS VECTOR!
+
+        arrow = LineNodePath()
+        arrow.reparentTo(self.render)
+        arrow.drawArrow(posVec,  # pos 1
+                        velocityVec,  # pos 2
+                        5, 1)  # line stuff
+        arrow.create()
 
     def setPos(self, x, y, z):
         self.np.setPos(x, y, z)

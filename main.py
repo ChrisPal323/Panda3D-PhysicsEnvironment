@@ -32,9 +32,9 @@ class SimplePhysicsEngine(ShowBase):
         self.enableParticles()
 
         # Font / text
-        font = self.loader.loadFont('media/fonts/Carlito-Regular.ttf')
-        font.setPixelsPerUnit(100)
-        font.setPageSize(512, 1024)
+        self.font = self.loader.loadFont('media/fonts/Carlito-Regular.ttf')
+        self.font.setPixelsPerUnit(100)
+        self.font.setPageSize(512, 1024)
         loading = OnscreenText(text='Loading...',
                                scale=0.2,
                                pos=(0.0, 0.0),
@@ -42,7 +42,7 @@ class SimplePhysicsEngine(ShowBase):
                                shadow=(0.3, 0.3, 0.3, 1.0),
                                align=core.TextNode.ACenter,
                                mayChange=True,
-                               font=font,
+                               font=self.font,
                                parent=self.aspect2d)
 
         self.graphicsEngine.renderFrame()  # Must render frame after text change for some
@@ -52,10 +52,15 @@ class SimplePhysicsEngine(ShowBase):
         self.graphicsEngine.renderFrame()
         self.graphicsEngine.renderFrame()
 
-        self.scene = self.loader.loadModel("media/models/environment")
-        self.scene.setScale(0.05, 0.05, 0.05)
-        self.scene.setPos(0, 0, 0)
-        self.scene.reparentTo(self.render)
+        self.posText = OnscreenText(text="",
+                                    scale=0.1,
+                                    pos=(-1.15, 0.87),
+                                    fg=(1, 1, 1, 1),
+                                    shadow=(0.3, 0.3, 0.3, 1.0),
+                                    align=core.TextNode.ACenter,
+                                    mayChange=True,
+                                    font=self.font,
+                                    parent=self.aspect2d)
 
         # -------------------------  Physics  -------------------------------
 
@@ -63,21 +68,33 @@ class SimplePhysicsEngine(ShowBase):
 
         # Create box object (name, mass, shapeName, size)
         box = objectphysics.Object('Test Box', 1, 'box', Vec3(0.5, 0.5, 0.5))
-        box.setPos(0, 0, 5)
+        box.attachToRender(self.render)
+        box.setPos(0, 0, 100)
 
         # Attach object
         physicsWorld.addObject(box)
 
         def update(task):
+
+            # Physics refresh
             dt = globalClock.getDt()
             physicsWorld.world.doPhysics(dt)
+
+            # Update and clear pos text
+            self.cameraPos = f"({round(self.camera.getX(), 1)}, {round(self.camera.getY(), 1)}, {round(self.camera.getZ(), 1)})"
+            self.posText.text = self.cameraPos
+
+            # print linear velocity
+            box.drawLinearVelocityArrow()
+
             return task.cont
 
         taskMgr.add(update, 'update')
 
         # ----------------------------------------------------------------------
 
-        loading.destroy()  # clear text a
+        loading.destroy()  # clear text
+        self.font.setPageSize(256, 512)  # change size for cords
 
         self.camLens.setFocalLength(0.4)
         self.camera.setPos(-5, 0, 2)
@@ -91,6 +108,7 @@ class SimplePhysicsEngine(ShowBase):
                                           self.camera,
                                           self.cam,
                                           self.win)
+
 
     def add_light(self):
         x, y = random.choice(list(self.world.columns()))
