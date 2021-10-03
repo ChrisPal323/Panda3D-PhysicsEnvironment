@@ -77,6 +77,18 @@ class PlayerModel(DirectObject):
         self.static_pos_bool = False
         self.static_pos = Vec3()
 
+        self.recenterMouse = True
+
+# ---------------------------------------
+
+    def turnOffRecenter(self):
+        self.recenterMouse = False
+
+    def turnOnRecenter(self):
+        self.recenterMouse = True
+
+# ---------------------------------------
+
     def getX(self):
         return self.player.getX()
 
@@ -132,95 +144,93 @@ class PlayerModel(DirectObject):
             # cam view target initialization
             camViewTarget = LVecBase3f()
 
-            if base.win.movePointer(0, window_Xcoord_halved, window_Ycoord_halved):
-                p = 0
+            if self.recenterMouse:
+                # If here, not in pause menu
 
-                if mouse_watch.has_mouse():
-                    # calculate the pitch of camera
-                    p = self.camera.get_p() - (mouseY - window_Ycoord_halved) * mouseSpeedY
+                if base.win.movePointer(0, window_Xcoord_halved, window_Ycoord_halved):
+                    p = 0
 
-                # sanity checking
-                if p < minPitch:
-                    p = minPitch
-                elif p > maxPitch:
-                    p = maxPitch
+                    if mouse_watch.has_mouse():
 
-                if mouse_watch.has_mouse():
-                    # directly set the camera pitch
-                    self.camera.set_p(p)
-                    camViewTarget.set_y(p)
+                        # calculate the pitch of camera
+                        p = self.camera.get_p() - (mouseY - window_Ycoord_halved) * mouseSpeedY
 
-                # rotate the self.player's heading according to the mouse x-axis movement
-                if mouse_watch.has_mouse():
-                    h = self.player.get_h() - (mouseX - window_Xcoord_halved) * mouseSpeedX
-
-                if mouse_watch.has_mouse():
                     # sanity checking
-                    if h < -360:
-                        h += 360
+                    if p < minPitch:
+                        p = minPitch
+                    elif p > maxPitch:
+                        p = maxPitch
 
-                    elif h > 360:
-                        h -= 360
+                    if mouse_watch.has_mouse():
+                        # directly set the camera pitch
+                        self.camera.set_p(p)
+                        camViewTarget.set_y(p)
 
-                    self.player.set_h(h)
-                    camViewTarget.set_x(h)
+                    # rotate the self.player's heading according to the mouse x-axis movement
+                    if mouse_watch.has_mouse():
+                        h = self.player.get_h() - (mouseX - window_Xcoord_halved) * mouseSpeedX
 
-            if self.keyMap["left"]:
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                    if mouse_watch.has_mouse():
+                        # directly set the camera heading (yaw)
+                        self.player.set_h(h)
+                        camViewTarget.set_x(h)
 
-                self.player.set_x(self.player, -self.striveSpeed * globalClock.get_dt())
+                if self.keyMap["left"]:
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
 
-            if not self.keyMap["left"]:
-                if not self.static_pos_bool:
-                    self.static_pos_bool = True
-                    self.static_pos = self.player.get_pos()
+                    self.player.set_x(self.player, -self.striveSpeed * globalClock.get_dt())
 
-                self.player.set_x(self.static_pos[0])
-                self.player.set_y(self.static_pos[1])
+                if not self.keyMap["left"]:
+                    if not self.static_pos_bool:
+                        self.static_pos_bool = True
+                        self.static_pos = self.player.get_pos()
 
-            if self.keyMap["right"]:
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                    self.player.set_x(self.static_pos[0])
+                    self.player.set_y(self.static_pos[1])
 
-                self.player.set_x(self.player, self.striveSpeed * globalClock.get_dt())
+                if self.keyMap["right"]:
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
 
-            if not self.keyMap["right"]:
-                if not self.static_pos_bool:
-                    self.static_pos_bool = True
-                    self.static_pos = self.player.get_pos()
+                    self.player.set_x(self.player, self.striveSpeed * globalClock.get_dt())
 
-                self.player.set_x(self.static_pos[0])
-                self.player.set_y(self.static_pos[1])
+                if not self.keyMap["right"]:
+                    if not self.static_pos_bool:
+                        self.static_pos_bool = True
+                        self.static_pos = self.player.get_pos()
 
-            if self.keyMap["forward"]:
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                    self.player.set_x(self.static_pos[0])
+                    self.player.set_y(self.static_pos[1])
 
-                self.player.set_y(self.player, self.movementSpeedForward * globalClock.get_dt())
+                if self.keyMap["forward"]:
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
 
-            if self.keyMap["forward"] != 1:
-                if not self.static_pos_bool:
-                    self.static_pos_bool = True
-                    self.static_pos = self.player.get_pos()
+                    self.player.set_y(self.player, self.movementSpeedForward * globalClock.get_dt())
 
-                self.player.set_x(self.static_pos[0])
-                self.player.set_y(self.static_pos[1])
-                self.player.set_z(self.player, self.dropSpeed * globalClock.get_dt())
+                if self.keyMap["forward"] != 1:
+                    if not self.static_pos_bool:
+                        self.static_pos_bool = True
+                        self.static_pos = self.player.get_pos()
 
-            if self.keyMap["backward"]:
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                    self.player.set_x(self.static_pos[0])
+                    self.player.set_y(self.static_pos[1])
+                    self.player.set_z(self.player, self.dropSpeed * globalClock.get_dt())
 
-                self.player.set_y(self.player, -self.movementSpeedBackward * globalClock.get_dt())
+                if self.keyMap["backward"]:
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
 
-            if self.keyMap["jump"]:
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                    self.player.set_y(self.player, -self.movementSpeedBackward * globalClock.get_dt())
 
-                if self.static_pos_bool:
-                    self.static_pos_bool = False
+                if self.keyMap["jump"]:
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
 
-                self.player.node().do_jump()
+                    if self.static_pos_bool:
+                        self.static_pos_bool = False
+
+                    self.player.node().do_jump()
 
         return Task.cont

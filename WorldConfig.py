@@ -92,11 +92,3 @@ class World():
             plight_1_node.set_pos(random.uniform(-21, -20), random.uniform(-21, -20), random.uniform(20, 21))
             self.render.set_light(plight_1_node)
 
-        # point light for volumetric lighting filter
-        plight_1 = PointLight('plight')
-        # add plight props here
-        plight_1_node = self.render.attach_new_node(plight_1)
-        # group the lights close to each other to create a sun effect
-        plight_1_node.set_pos(random.uniform(-21, -20), random.uniform(-21, -20), random.uniform(20, 21))
-        self.render.set_light(plight_1_node)
-

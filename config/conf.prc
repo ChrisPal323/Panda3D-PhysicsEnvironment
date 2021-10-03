@@ -1,5 +1,5 @@
 win-size 1280 720
-window-title Panda3D Arena FPS Sample Program
+window-title Physics Environment
 show-frame-rate-meter #t
 framebuffer-multisample 1
 depth-bits 24

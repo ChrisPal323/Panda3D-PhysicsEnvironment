@@ -1,12 +1,18 @@
 import sys
 import random
+import time
 
 from panda3d.core import WindowProperties
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.ShowBaseGlobal import globalClock
 import gltf
 
+from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import OnscreenImage
+from direct.gui.DirectGui import *
+
 from panda3d.core import loadPrcFile
+
 loadPrcFile("config/conf.prc")
 
 # Local Imports
@@ -36,10 +42,6 @@ class SimplePhysicsEngine(ShowBase):
         self.camLens.set_fov(80)
         self.camLens.set_near_far(0.01, 90000)
         self.camLens.set_focal_length(7)
-
-        # Add some debug stuff
-        self.accept("f3", self.toggle_wireframe)
-        self.accept("escape", sys.exit, [0])
 
         # Create Physics World
         self.world = WorldConfig.World(self.taskMgr, self.render, self.loader)
@@ -86,6 +88,72 @@ class SimplePhysicsEngine(ShowBase):
         debugNP = self.render.attach_new_node(debugNode)
         self.world.world.set_debug_node(debugNP.node())
 
+        # pause menu
+        self.pause_isHidden = True
+
+        def toggle_pause():
+            if self.pause_isHidden:
+
+                self.pause_isHidden = False
+                nunito_font = self.loader.load_font('media/fonts/Nunito/Nunito-Light.ttf')
+
+                # 'pause'
+                self.task_mgr.remove('Player Move')
+                self.task_mgr.remove('General Update')
+                self.task_mgr.remove('Physics Update')
+
+                # Release Mouse
+                self.player.turnOnRecenter()
+
+                # Show
+                self.pauseBg = OnscreenImage(
+                    image="media/img/pause.png",
+                    scale=(1.8, 1.5, 1))
+
+                self.exitButton = DirectButton(
+                    text="Exit Game", text_font=nunito_font,
+                    scale=0.15, command=exitGame,
+                    pad=(0.3, 0.3),
+                    pos=(0, 0, -0.2))
+
+                self.resumeButton = DirectButton(
+                    text="Resume Game", text_font=nunito_font,
+                    scale=0.15, command=toggle_pause,
+                    pad=(0.3, 0.3),
+                    pos=(0, 0, 0.2))
+
+                # turn on mouse visible
+                props = WindowProperties()
+                props.setCursorHidden(False)
+                base.win.requestProperties(props)
+
+                # cancel control
+                self.player.turnOffRecenter()
+
+            else:
+
+                # Add tasks back
+                self.task_mgr.add(self.player.move, 'Player Move')
+                self.task_mgr.add(update, 'General Update')
+                self.task_mgr.add(physics_update, 'Physics Update')
+
+                # Hide pause menu
+                self.resumeButton.destroy()
+                self.exitButton.destroy()
+                self.pauseBg.destroy()
+                # set bool
+                self.pause_isHidden = True
+                # Recenter mouse
+                self.player.turnOnRecenter()
+                # turn off mouse visible
+                props = WindowProperties()
+                props.setCursorHidden(True)
+                base.win.requestProperties(props)
+
+        # Exit function
+        def exitGame():
+            sys.exit()
+
         # debug toggle function
         def toggle_debug():
             if debugNP.is_hidden():
@@ -94,6 +162,8 @@ class SimplePhysicsEngine(ShowBase):
                 debugNP.hide()
 
         self.accept('f1', toggle_debug)
+        self.accept("f3", self.toggle_wireframe)
+        self.accept("escape", toggle_pause)
 
         # General Updates
         def update(Task):
@@ -113,9 +183,9 @@ class SimplePhysicsEngine(ShowBase):
             return Task.cont
 
         # Attach to manager
-        self.task_mgr.add(self.player.move)
-        self.task_mgr.add(update)
-        self.task_mgr.add(physics_update)
+        self.task_mgr.add(self.player.move, 'Player Move')
+        self.task_mgr.add(update, 'General Update')
+        self.task_mgr.add(physics_update, 'Physics Update')
 
 
 app = SimplePhysicsEngine()
