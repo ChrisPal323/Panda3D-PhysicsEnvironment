@@ -1,126 +1,121 @@
+import sys
 import random
+
+from panda3d.core import WindowProperties
 from direct.showbase.ShowBase import ShowBase
-from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
+from direct.showbase.ShowBaseGlobal import globalClock
+import gltf
 
-import panda3d.core as core
-from panda3d.core import CollisionSphere
-from panda3d.core import NodePath
-from panda3d.core import Vec3
-from panda3d.core import CollisionHandlerQueue
+from panda3d.core import loadPrcFile
+loadPrcFile("config/conf.prc")
 
-import camera
-import worldphysics
-import objectphysics
+# Local Imports
+import WorldConfig
+import ObjectPhysics
+import PlayerModel
+import TextNodes
+
 
 class SimplePhysicsEngine(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
 
-        # Name Frame
-        wp = core.WindowProperties()
-        wp.setTitle("Simple Physics Engine")
-        wp.setSize(1080, 720)
-        wp.setCursorHidden(True)
-        self.win.requestProperties(wp)
+        # create loader
+        gltf.patch_loader(self.loader)
 
-        # Set render stuff
-        self.setBackgroundColor(0.5, 0.5, 1)
-        self.disableMouse()  # This name sucks, just disables default mouse
+        # disable default mouse movement
+        self.disable_mouse()
 
-        # Physics Engine?
-        self.enableParticles()
+        # Window / Render properties
+        props = WindowProperties()
+        props.set_mouse_mode(WindowProperties.M_relative)
+        base.win.request_properties(props)
+        base.set_background_color(0.5, 0.5, 0.8)
 
-        # Font / text
-        self.font = self.loader.loadFont('media/fonts/Carlito-Regular.ttf')
-        self.font.setPixelsPerUnit(100)
-        self.font.setPageSize(512, 1024)
-        loading = OnscreenText(text='Loading...',
-                               scale=0.2,
-                               pos=(0.0, 0.0),
-                               fg=(1, 1, 1, 1),
-                               shadow=(0.3, 0.3, 0.3, 1.0),
-                               align=core.TextNode.ACenter,
-                               mayChange=True,
-                               font=self.font,
-                               parent=self.aspect2d)
+        # Set cam settings
+        self.camLens.set_fov(80)
+        self.camLens.set_near_far(0.01, 90000)
+        self.camLens.set_focal_length(7)
 
-        self.graphicsEngine.renderFrame()  # Must render frame after text change for some
-        self.graphicsEngine.renderFrame()  # Twice for some reason?
+        # Add some debug stuff
+        self.accept("f3", self.toggle_wireframe)
+        self.accept("escape", sys.exit, [0])
 
-        loading.setText('Generating world')
-        self.graphicsEngine.renderFrame()
-        self.graphicsEngine.renderFrame()
+        # Create Physics World
+        self.world = WorldConfig.World(self.taskMgr, self.render, self.loader)
 
-        self.posText = OnscreenText(text="",
-                                    scale=0.1,
-                                    pos=(-1.15, 0.87),
-                                    fg=(1, 1, 1, 1),
-                                    shadow=(0.3, 0.3, 0.3, 1.0),
-                                    align=core.TextNode.ACenter,
-                                    mayChange=True,
-                                    font=self.font,
-                                    parent=self.aspect2d)
+        # Game start bool
+        self.game_start = 0
 
-        # -------------------------  Physics  -------------------------------
+        # Create player with movement and camera
+        self.player = PlayerModel.PlayerModel(self.render, self.world.world, self.camera, self.world.getShader())
 
-        physicsWorld = worldphysics.PhysicsWorld(self.taskMgr)
+        # Add text
+        cordText = TextNodes.CustomTextNode('Cords', '(0, 0, 0)', (-1.7, 0, 0.92), 0.05, self.loader)
 
-        # Create box object (name, mass, shapeName, size)
-        box = objectphysics.Object('Test Box', 1, 'box', Vec3(0.5, 0.5, 0.5))
-        box.attachToRender(self.render)
-        box.setPos(0, 0, 100)
+        # on-screen target dot for aiming
+        targetDotText = TextNodes.CustomTextNode('DotAim', ".", (0, 0, 0), 0.075, self.loader)
 
-        # Attach object
-        physicsWorld.addObject(box)
+        # Testing boxes!
+        boxCount = 50
 
-        # create linear velocity
-        box.createLinearVelocityArrow()
+        # add a few random physics boxes
+        for x in range(0, boxCount):
+            # Create default cube
+            cube = ObjectPhysics.Object(self.render,  # Render
+                                        self.world.world,  # World
+                                        self.loader,  # Loader
+                                        "random_cubes",  # Object Name
+                                        (random.uniform(50, -50), random.uniform(50, -50), random.uniform(5, 10)),
+                                        # Pos ^
+                                        (1, 1, 1),  # Size
+                                        1,  # Mass
+                                        20,  # Friction
+                                        'media/models/1m_cube.gltf',  # Path
+                                        (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), 1))  # Color
 
-        def update(task):
+        # ----------- End game ---------------
 
-            # Physics refresh
-            dt = globalClock.getDt()
-            physicsWorld.world.doPhysics(dt)
+        # Bullet debugger
+        from panda3d.bullet import BulletDebugNode
+        debugNode = BulletDebugNode('Debug')
+        debugNode.show_wireframe(True)
+        debugNode.show_constraints(True)
+        debugNode.show_bounding_boxes(False)
+        debugNode.show_normals(False)
+        debugNP = self.render.attach_new_node(debugNode)
+        self.world.world.set_debug_node(debugNP.node())
 
-            # Update and clear pos text
-            self.cameraPos = f"({round(self.camera.getX(), 1)}, {round(self.camera.getY(), 1)}, {round(self.camera.getZ(), 1)})"
-            self.posText.text = self.cameraPos
+        # debug toggle function
+        def toggle_debug():
+            if debugNP.is_hidden():
+                debugNP.show()
+            else:
+                debugNP.hide()
 
+        self.accept('f1', toggle_debug)
 
-            return task.cont
+        # General Updates
+        def update(Task):
+            if self.game_start < 1:
+                self.game_start = 1
 
-        taskMgr.add(update, 'update')
+            # Update Text
+            cordText.updateText(
+                f"({round(self.player.getX(), 1)}, {round(self.player.getY(), 1)}, {round(self.player.getZ(), 1)})")
 
-        # ----------------------------------------------------------------------
+            return Task.cont
 
-        loading.destroy()  # clear text
-        self.font.setPageSize(256, 512)  # change size for cords
+        # Physics Updates
+        def physics_update(Task):
+            dt = globalClock.get_dt()
+            self.world.world.do_physics(dt)
+            return Task.cont
 
-        self.camLens.setFocalLength(0.4)
-        self.camera.setPos(-5, 0, 2)
-        self.cam.setHpr(0, -45, 0)
-
-        # World Size!
-        self.worldSize = core.LPoint3f(10, 10, 10)
-
-        self.cc = camera.CameraController(self.worldSize,
-                                          self.mouseWatcherNode,
-                                          self.camera,
-                                          self.cam,
-                                          self.win)
-
-
-    def add_light(self):
-        x, y = random.choice(list(self.world.columns()))
-        for z in reversed(range(self.world.depth)):
-            b = self.world.get_block(x, y, z)
-            if not b.is_void:
-                p = core.PointLight('pl-{}-{}-{}'.format(x, y, z))
-                p.setAttenuation(core.Point3(0, 0, 0.4))
-                pn = self.render.attachNewNode(p)
-                pn.setPos(x, y, z + 3)
-                self.render.setLight(pn)
+        # Attach to manager
+        self.task_mgr.add(self.player.move)
+        self.task_mgr.add(update)
+        self.task_mgr.add(physics_update)
 
 
 app = SimplePhysicsEngine()
