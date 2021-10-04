@@ -1,18 +1,15 @@
 import sys
 import random
-import time
 
 from panda3d.core import WindowProperties
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.ShowBaseGlobal import globalClock
 import gltf
 
-from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
+from direct.filter.CommonFilters import CommonFilters
 from direct.gui.DirectGui import *
 
 from panda3d.core import loadPrcFile
-
 loadPrcFile("config/conf.prc")
 
 # Local Imports
@@ -38,6 +35,13 @@ class SimplePhysicsEngine(ShowBase):
         base.win.request_properties(props)
         base.set_background_color(0.5, 0.5, 0.8)
 
+        # Filters
+        scene_filters = CommonFilters(base.win, base.cam)
+        scene_filters.set_bloom()
+        scene_filters.set_high_dynamic_range()
+        scene_filters.set_exposure_adjust(1.1)
+        scene_filters.set_gamma_adjust(1.1)
+
         # Set cam settings
         self.camLens.set_fov(80)
         self.camLens.set_near_far(0.01, 90000)
@@ -59,21 +63,33 @@ class SimplePhysicsEngine(ShowBase):
         targetDotText = TextNodes.CustomTextNode('DotAim', ".", (0, 0, 0), 0.075, self.loader)
 
         # Testing boxes!
-        boxCount = 50
+        objectCount = 150
 
         # add a few random physics boxes
-        for x in range(0, boxCount):
+        for x in range(0, objectCount):
             # Create default cube
-            cube = ObjectPhysics.Object(self.render,  # Render
+            cube = ObjectPhysics.BoxObject(self.render,  # Render
                                         self.world.world,  # World
                                         self.loader,  # Loader
                                         "random_cubes",  # Object Name
                                         (random.uniform(50, -50), random.uniform(50, -50), random.uniform(5, 10)),
                                         # Pos ^
-                                        (1, 1, 1),  # Size
+                                        (random.uniform(0.5, 1.5), random.uniform(0.5, 1.5), random.uniform(0.5, 1.5)),  # Shape
                                         1,  # Mass
                                         20,  # Friction
                                         'media/models/1m_cube.gltf',  # Path
+                                        (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), 1))  # Color
+
+            ball = ObjectPhysics.BallObject(self.render,  # Render
+                                        self.world.world,  # World
+                                        self.loader,  # Loader
+                                        "random_ball",  # Object Name
+                                        (random.uniform(50, -50), random.uniform(50, -50), random.uniform(5, 10)),
+                                        # Pos ^
+                                        random.uniform(0.5, 1.5),  # Radius
+                                        1,  # Mass
+                                        10,  # Friction
+                                        'media/models/1m_ball.bam',  # Path
                                         (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), 1))  # Color
 
         # ----------- End game ---------------

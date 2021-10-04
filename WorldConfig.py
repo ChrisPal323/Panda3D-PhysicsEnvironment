@@ -1,5 +1,3 @@
-import random
-
 from panda3d.core import Vec3
 from panda3d.core import BitMask32
 from panda3d.core import Shader, ShaderAttrib
@@ -27,14 +25,14 @@ class World():
         self.world = BulletWorld()
         self.world.set_gravity(Vec3(0, 0, -9.81))
 
-        arena_1 = loader.load_model('media/models/area.gltf')
-        arena_1.reparent_to(self.render)
-        arena_1.set_pos(0, 0, 0)
+        arena = loader.load_model('media/models/area.gltf')
+        arena.reparent_to(self.render)
+        arena.set_pos(0, 0, 0)
 
         # Turn arena solid
-        self.make_collision_from_model(arena_1, 0, 0, self.world, (arena_1.get_pos()))
+        self.make_collision_from_model(arena, 0, 0, self.world, (arena.get_pos()))
 
-        # Create light points
+        # Create light
         self.generatePointLight()
 
         # Generate Shaders
@@ -83,12 +81,15 @@ class World():
         world.attach_rigid_body(np.node())
 
     def generatePointLight(self):
+
+        light_pos = [(0, 0, 100), (100, 100, 100), (100, -100, 100), (-100, 100, 100), (-100, -100, 100)]
+
         # point light generator
         for x in range(5):
-            plight_1 = PointLight('plight')
+            plight = PointLight('plight')
             # add plight props here
-            plight_1_node = self.render.attach_new_node(plight_1)
+            plight_node = self.render.attach_new_node(plight)
             # group the lights close to each other to create a sun effect
-            plight_1_node.set_pos(random.uniform(-21, -20), random.uniform(-21, -20), random.uniform(20, 21))
-            self.render.set_light(plight_1_node)
+            plight_node.set_pos(light_pos[x-1])
+            self.render.set_light(plight_node)
 
