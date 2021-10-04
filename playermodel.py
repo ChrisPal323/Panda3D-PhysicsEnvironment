@@ -12,11 +12,12 @@ from direct.actor.Actor import Actor
 
 # Class for player configs
 class PlayerModel(DirectObject):
-    def __init__(self, render, world, camera, shader):
+    def __init__(self, render, world, camera, shader, targetDotText):
 
         self.render = render
         self.world = world
         self.camera = camera
+        self.targetDotText = targetDotText
 
         self.game_start = 1
 
@@ -99,6 +100,7 @@ class PlayerModel(DirectObject):
         return self.player.getZ()
 
     # Nice ol' movement function
+    # TODO : Make this pretty lol
     def move(self, Task):
         if self.game_start > 0:
 
@@ -119,8 +121,14 @@ class PlayerModel(DirectObject):
                 posTo = self.render.get_relative_point(base.cam, posTo)
                 rayTest = self.world.ray_test_closest(posFrom, posTo)
                 target = rayTest.get_node()
-                # print(target) Probably useful in future
-                target_dot = aspect2d.find_all_matches("**/target_dot_node")
+
+                if target is not None and target.getMass() > 0:
+                    # Set hitmarker color
+                    self.targetDotText.setColor(0.9, 0.1, 0.1, 1)
+
+                else:
+                    # Just looking at nothing
+                    self.targetDotText.setColor(1, 1, 1, 1)
 
             # get mouse data
             mouse_watch = base.mouseWatcherNode

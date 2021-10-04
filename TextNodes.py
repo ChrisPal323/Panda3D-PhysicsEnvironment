@@ -24,3 +24,7 @@ class CustomTextNode():
     # Update Text
     def updateText(self, text):
         self.text.setText(text)
+
+    # Set Colo
+    def setColor(self, r, g, b, a):
+        self.text.set_text_color(r, g, b, a)

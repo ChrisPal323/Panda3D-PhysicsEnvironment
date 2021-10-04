@@ -37,10 +37,10 @@ class SimplePhysicsEngine(ShowBase):
 
         # Filters
         scene_filters = CommonFilters(base.win, base.cam)
-        scene_filters.set_bloom()
+        #scene_filters.set_bloom()
         scene_filters.set_high_dynamic_range()
         scene_filters.set_exposure_adjust(1.1)
-        scene_filters.set_gamma_adjust(1.1)
+        scene_filters.set_gamma_adjust(1)
 
         # Set cam settings
         self.camLens.set_fov(80)
@@ -53,14 +53,14 @@ class SimplePhysicsEngine(ShowBase):
         # Game start bool
         self.game_start = 0
 
-        # Create player with movement and camera
-        self.player = PlayerModel.PlayerModel(self.render, self.world.world, self.camera, self.world.getShader())
-
         # Add text
         cordText = TextNodes.CustomTextNode('Cords', '(0, 0, 0)', (-1.7, 0, 0.92), 0.05, self.loader)
 
         # on-screen target dot for aiming
-        targetDotText = TextNodes.CustomTextNode('DotAim', ".", (0, 0, 0), 0.075, self.loader)
+        self.targetDotText = TextNodes.CustomTextNode('DotAim', ".", (0, 0, 0), 0.075, self.loader)
+
+        # Create player with movement and camera
+        self.player = PlayerModel.PlayerModel(self.render, self.world.world, self.camera, self.world.getShader(), self.targetDotText)
 
         # Testing boxes!
         objectCount = 150
