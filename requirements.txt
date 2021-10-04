@@ -1,3 +1,4 @@
+# Cool gamer librarys for epic gamers
 numpy==1.20.1
 panda3d_gltf==0.13
 panda3d==1.10.10
