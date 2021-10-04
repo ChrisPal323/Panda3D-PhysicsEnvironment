@@ -100,7 +100,7 @@ class PlayerModel(DirectObject):
         return self.player.getZ()
 
     # Nice ol' movement function
-    # TODO : Make this pretty lol
+    # TODO : Make this better / refactor lol
     def move(self, Task):
         if self.game_start > 0:
 
